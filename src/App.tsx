@@ -5,6 +5,7 @@ import Welcome from "./pages/welcome"
 import Quiz from "./pages/quiz"
 import Leaderboard from "./pages/leaderboard"
 import { PlayerScoreEntry } from "./types"
+import Results from "./pages/results"
 
 function App() {
   const [username, setUsername] = useState("")
@@ -56,11 +57,7 @@ function App() {
       <Route
         path="/quiz"
         element={
-          <Quiz
-            score={score}
-            setScore={setScore}
-            handleQuizComplete={handleQuizComplete}
-          />
+          <Quiz setScore={setScore} handleQuizComplete={handleQuizComplete} />
         }
       />
       <Route
@@ -73,6 +70,10 @@ function App() {
             setLeaderboard={setLeaderboard}
           />
         }
+      />
+      <Route
+        path="/results"
+        element={<Results score={score} totalQuestions={10} />}
       />
     </Routes>
   )
