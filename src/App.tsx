@@ -2,6 +2,7 @@ import { Route, Routes, useNavigate } from "react-router-dom"
 import "./App.css"
 import { useState } from "react"
 import Welcome from "./pages/welcome"
+import Quiz from "./pages/quiz"
 
 function App() {
   const [username, setUsername] = useState("")
@@ -31,6 +32,7 @@ function App() {
           />
         }
       />
+      <Route path="/quiz" element={<Quiz />} />
     </Routes>
   )
 }
