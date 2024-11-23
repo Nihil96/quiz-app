@@ -8,12 +8,17 @@ import { getRandomCapitals, getRandomContinents, shuffleArray } from "@/helpers"
 import { useQuery } from "@apollo/client"
 import { GET_COUNTRIES } from "@/graphql/queries/countriesQueries"
 
-const Quiz = () => {
+interface QuizProps {
+  score: number
+  setScore: React.Dispatch<React.SetStateAction<number>>
+  handleQuizComplete: () => void
+}
+
+const Quiz = ({ handleQuizComplete, score, setScore }: QuizProps) => {
   const [questions, setQuestions] = useState<Question[]>([])
   const [timeLeft, setTimeLeft] = useState(60)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>()
-  const [score, setScore] = useState(0)
   const { data, loading, error } = useQuery(GET_COUNTRIES)
 
   const handleAnswerSelect = (answer: string) => {
@@ -38,9 +43,9 @@ const Quiz = () => {
       setTimeLeft(30)
     } else {
       console.log("Quiz ended. Your score is: ", score)
-      // TODO: Save score to leaderboard
+      handleQuizComplete()
     }
-  }, [currentQuestionIndex, questions.length, score])
+  }, [currentQuestionIndex, handleQuizComplete, questions.length, score])
 
   const generateQuestions = (countries: Country[]) => {
     const questionTypes = [

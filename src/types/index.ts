@@ -25,3 +25,8 @@ export interface Question {
   question: string
   type: QuestionType
 }
+export interface PlayerScoreEntry {
+  username: string
+  score: number
+  timestamp: string
+}

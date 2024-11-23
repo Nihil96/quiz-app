@@ -3,9 +3,14 @@ import "./App.css"
 import { useState } from "react"
 import Welcome from "./pages/welcome"
 import Quiz from "./pages/quiz"
+import Leaderboard from "./pages/leaderboard"
+import { PlayerScoreEntry } from "./types"
 
 function App() {
   const [username, setUsername] = useState("")
+  const [score, setScore] = useState(0)
+  const [leaderboard, setLeaderboard] = useState<PlayerScoreEntry[]>([])
+
   const navigate = useNavigate()
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,6 +25,22 @@ function App() {
     navigate("/quiz")
   }
 
+  const handleQuizComplete = () => {
+    const newLeaderboardEntry = {
+      username,
+      score,
+      timestamp: new Date().toISOString(),
+    }
+
+    const updatedLeaderboard = [...leaderboard, newLeaderboardEntry]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10)
+
+    setLeaderboard(updatedLeaderboard)
+    localStorage.setItem("quizLeaderboard", JSON.stringify(updatedLeaderboard))
+    navigate("results")
+  }
+
   return (
     <Routes>
       <Route
@@ -32,7 +53,27 @@ function App() {
           />
         }
       />
-      <Route path="/quiz" element={<Quiz />} />
+      <Route
+        path="/quiz"
+        element={
+          <Quiz
+            score={score}
+            setScore={setScore}
+            handleQuizComplete={handleQuizComplete}
+          />
+        }
+      />
+      <Route
+        path="/leaderboard"
+        element={
+          <Leaderboard
+            username={username}
+            score={score}
+            leaderboard={leaderboard}
+            setLeaderboard={setLeaderboard}
+          />
+        }
+      />
     </Routes>
   )
 }
