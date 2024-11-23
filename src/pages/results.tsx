@@ -26,7 +26,7 @@ const Results = ({ score, totalQuestions }: ResultsProps) => {
           <div className="text-lg">Correct Answers</div>
         </div>
         <div className="flex justify-center space-x-4">
-          <Button onClick={() => navigate("welcome")} variant="outline">
+          <Button onClick={() => navigate("/")} variant="outline">
             <Home className="mr-2" />
             Home
           </Button>

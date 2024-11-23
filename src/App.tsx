@@ -24,6 +24,7 @@ function App() {
       return
     }
     navigate("/quiz")
+    setScore(0)
   }
 
   const handleQuizComplete = () => {
