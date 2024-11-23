@@ -9,12 +9,11 @@ import { useQuery } from "@apollo/client"
 import { GET_COUNTRIES } from "@/graphql/queries/countriesQueries"
 
 interface QuizProps {
-  score: number
   setScore: React.Dispatch<React.SetStateAction<number>>
   handleQuizComplete: () => void
 }
 
-const Quiz = ({ handleQuizComplete, score, setScore }: QuizProps) => {
+const Quiz = ({ handleQuizComplete, setScore }: QuizProps) => {
   const [questions, setQuestions] = useState<Question[]>([])
   const [timeLeft, setTimeLeft] = useState(60)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -42,10 +41,9 @@ const Quiz = ({ handleQuizComplete, score, setScore }: QuizProps) => {
       setSelectedAnswer(null)
       setTimeLeft(30)
     } else {
-      console.log("Quiz ended. Your score is: ", score)
       handleQuizComplete()
     }
-  }, [currentQuestionIndex, handleQuizComplete, questions.length, score])
+  }, [currentQuestionIndex, handleQuizComplete, questions.length])
 
   const generateQuestions = (countries: Country[]) => {
     const questionTypes = [
