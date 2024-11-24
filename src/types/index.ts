@@ -30,3 +30,8 @@ export interface PlayerScoreEntry {
   score: number
   timestamp: string
 }
+
+export type AnsweredQuestions = Record<
+  number,
+  { answer: string; isCorrect: boolean }
+>

@@ -4,7 +4,7 @@ import { useState } from "react"
 import Welcome from "./pages/welcome"
 import Quiz from "./pages/quiz"
 import Leaderboard from "./pages/leaderboard"
-import { PlayerScoreEntry } from "./types"
+import { AnsweredQuestions, PlayerScoreEntry } from "./types"
 import Results from "./pages/results"
 
 function App() {
@@ -12,7 +12,9 @@ function App() {
   const [score, setScore] = useState(0)
   const [leaderboard, setLeaderboard] = useState<PlayerScoreEntry[]>([])
   const [isTimerActive, setIsTimerActive] = useState(true)
-
+  const [answeredQuestions, setAnsweredQuestions] = useState<AnsweredQuestions>(
+    {}
+  )
   const navigate = useNavigate()
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,6 +27,7 @@ function App() {
       return
     }
     setScore(0)
+    setAnsweredQuestions({})
     setIsTimerActive(true)
     navigate("/quiz")
   }
@@ -65,6 +68,8 @@ function App() {
             handleQuizComplete={handleQuizComplete}
             isTimerActive={isTimerActive}
             setIsTimerActive={setIsTimerActive}
+            answeredQuestions={answeredQuestions}
+            setAnsweredQuestions={setAnsweredQuestions}
           />
         }
       />

@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Timer, ChevronRight, ChevronLeft } from "lucide-react"
-import { Country, Question } from "@/types"
+import { AnsweredQuestions, Country, Question } from "@/types"
 import { useCallback, useEffect, useState } from "react"
 import { getRandomCapitals, getRandomContinents, shuffleArray } from "@/helpers"
 import { useQuery } from "@apollo/client"
@@ -13,6 +13,8 @@ interface QuizProps {
   handleQuizComplete: () => void
   setIsTimerActive: React.Dispatch<React.SetStateAction<boolean>>
   isTimerActive: boolean
+  setAnsweredQuestions: React.Dispatch<React.SetStateAction<AnsweredQuestions>>
+  answeredQuestions: AnsweredQuestions
 }
 
 const Quiz = ({
@@ -20,6 +22,8 @@ const Quiz = ({
   setScore,
   setIsTimerActive,
   isTimerActive,
+  setAnsweredQuestions,
+  answeredQuestions,
 }: QuizProps) => {
   const [questions, setQuestions] = useState<Question[]>([])
   const [timeLeft, setTimeLeft] = useState(30)
@@ -28,9 +32,25 @@ const Quiz = ({
   const { data, loading, error } = useQuery(GET_COUNTRIES)
 
   const handleAnswerSelect = (answer: string) => {
-    setSelectedAnswer(answer)
+    // Check if question has already been answered
+    if (answeredQuestions[currentQuestionIndex] !== undefined) {
+      return
+    }
+
     setIsTimerActive(false)
-    if (answer === questions[currentQuestionIndex].correctAnswer) {
+    setSelectedAnswer(answer)
+    const isCorrect = answer === questions[currentQuestionIndex].correctAnswer
+
+    // Store the answer and whether it was correct
+    setAnsweredQuestions((prev) => ({
+      ...prev,
+      [currentQuestionIndex]: {
+        answer,
+        isCorrect,
+      },
+    }))
+
+    if (isCorrect) {
       setScore((prev) => prev + 1)
     }
   }
@@ -38,16 +58,18 @@ const Quiz = ({
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1)
-      setSelectedAnswer(null)
+      const prevAnswer = answeredQuestions[currentQuestionIndex - 1]
+      setSelectedAnswer(prevAnswer ? prevAnswer.answer : null)
       setTimeLeft(30)
-      setIsTimerActive(true)
+      setIsTimerActive(false)
     }
   }
 
   const handleNextQuestion = useCallback(() => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1)
-      setSelectedAnswer(null)
+      const nextAnswer = answeredQuestions[currentQuestionIndex + 1]
+      setSelectedAnswer(nextAnswer ? nextAnswer.answer : null)
       setTimeLeft(30)
       setIsTimerActive(true)
     } else {
@@ -56,6 +78,7 @@ const Quiz = ({
   }, [
     currentQuestionIndex,
     questions.length,
+    answeredQuestions,
     setIsTimerActive,
     handleQuizComplete,
   ])
@@ -146,6 +169,11 @@ const Quiz = ({
   const currentQuestion = questions[currentQuestionIndex]
   if (!currentQuestion) return null
 
+  const answeredQuestion = answeredQuestions[currentQuestionIndex]
+  const currentAnswer = answeredQuestion
+    ? answeredQuestion.answer
+    : selectedAnswer
+
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
@@ -168,23 +196,25 @@ const Quiz = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 gap-4">
-          {currentQuestion.options.map((option: string, index: number) => (
-            <Button
-              key={index}
-              onClick={() => handleAnswerSelect(option)}
-              variant={selectedAnswer === option ? "default" : "outline"}
-              className={`w-full justify-start ${
-                selectedAnswer && option === currentQuestion.correctAnswer
-                  ? "bg-green-500 hover:bg-green-600"
-                  : selectedAnswer === option &&
-                    option !== currentQuestion.correctAnswer
-                  ? "bg-red-500 hover:bg-red-600"
-                  : ""
-              }`}
-            >
-              {option}
-            </Button>
-          ))}
+          {currentQuestion.options.map((option: string, index: number) => {
+            return (
+              <Button
+                key={index}
+                onClick={() => handleAnswerSelect(option)}
+                variant={currentAnswer === option ? "default" : "outline"}
+                className={`w-full justify-start ${
+                  currentAnswer && option === currentQuestion.correctAnswer
+                    ? "bg-green-500 hover:bg-green-600"
+                    : currentAnswer === option &&
+                      option !== currentQuestion.correctAnswer
+                    ? "bg-red-500 hover:bg-red-600"
+                    : ""
+                }`}
+              >
+                {option}
+              </Button>
+            )
+          })}
         </div>
         <div className="flex justify-between mt-6">
           <Button
@@ -195,7 +225,7 @@ const Quiz = ({
             <ChevronLeft className="mr-2" />
             Previous
           </Button>
-          <Button onClick={handleNextQuestion} disabled={!selectedAnswer}>
+          <Button onClick={handleNextQuestion} disabled={!currentAnswer}>
             {currentQuestionIndex === questions.length - 1 ? "Finish" : "Next"}
             <ChevronRight className="ml-2" />
           </Button>
