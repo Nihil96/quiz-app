@@ -56,9 +56,6 @@ const Leaderboard = ({ setLeaderboard, leaderboard }: LeaderboardProps) => {
             <p className="text-gray-600">
               No scores yet! Play a quiz to see your name here.
             </p>
-            <Button onClick={() => navigate("/quiz")} className="mt-4">
-              Start Quiz
-            </Button>
           </div>
         )}
         <Button
