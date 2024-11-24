@@ -149,7 +149,7 @@ const Quiz = ({
     } else if (timeLeft === 0) {
       handleNextQuestion()
     }
-  }, [timeLeft, isTimerActive, handleNextQuestion])
+  }, [timeLeft, isTimerActive])
 
   if (loading) {
     return (
