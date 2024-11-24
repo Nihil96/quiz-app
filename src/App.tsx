@@ -47,7 +47,7 @@ function App() {
 
     setLeaderboard(updatedLeaderboard)
     localStorage.setItem("quizLeaderboard", JSON.stringify(updatedLeaderboard))
-    navigate("results")
+    navigate(ROUTES.RESULT)
   }
 
   const handleIncrementScore = (value: number = 1) => {
