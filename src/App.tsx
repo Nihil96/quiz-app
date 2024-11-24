@@ -11,6 +11,7 @@ function App() {
   const [username, setUsername] = useState("")
   const [score, setScore] = useState(0)
   const [leaderboard, setLeaderboard] = useState<PlayerScoreEntry[]>([])
+  const [isTimerActive, setIsTimerActive] = useState(true)
 
   const navigate = useNavigate()
 
@@ -23,8 +24,9 @@ function App() {
       alert("Please enter a valid username")
       return
     }
-    navigate("/quiz")
     setScore(0)
+    setIsTimerActive(true)
+    navigate("/quiz")
   }
 
   const handleQuizComplete = () => {
@@ -58,7 +60,12 @@ function App() {
       <Route
         path="/quiz"
         element={
-          <Quiz setScore={setScore} handleQuizComplete={handleQuizComplete} />
+          <Quiz
+            setScore={setScore}
+            handleQuizComplete={handleQuizComplete}
+            isTimerActive={isTimerActive}
+            setIsTimerActive={setIsTimerActive}
+          />
         }
       />
       <Route

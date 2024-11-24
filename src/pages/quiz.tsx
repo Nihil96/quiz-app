@@ -11,39 +11,54 @@ import { GET_COUNTRIES } from "@/graphql/queries/countriesQueries"
 interface QuizProps {
   setScore: React.Dispatch<React.SetStateAction<number>>
   handleQuizComplete: () => void
+  setIsTimerActive: React.Dispatch<React.SetStateAction<boolean>>
+  isTimerActive: boolean
 }
 
-const Quiz = ({ handleQuizComplete, setScore }: QuizProps) => {
+const Quiz = ({
+  handleQuizComplete,
+  setScore,
+  setIsTimerActive,
+  isTimerActive,
+}: QuizProps) => {
   const [questions, setQuestions] = useState<Question[]>([])
-  const [timeLeft, setTimeLeft] = useState(60)
+  const [timeLeft, setTimeLeft] = useState(30)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>()
   const { data, loading, error } = useQuery(GET_COUNTRIES)
 
   const handleAnswerSelect = (answer: string) => {
     setSelectedAnswer(answer)
+    setIsTimerActive(false)
     if (answer === questions[currentQuestionIndex].correctAnswer) {
-      setScore((prevScore) => prevScore + 1)
+      setScore((prev) => prev + 1)
     }
   }
 
   const handlePreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prevQuestion) => prevQuestion - 1)
+      setCurrentQuestionIndex((prev) => prev - 1)
       setSelectedAnswer(null)
       setTimeLeft(30)
+      setIsTimerActive(true)
     }
   }
 
   const handleNextQuestion = useCallback(() => {
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex((prevQuestion) => prevQuestion + 1)
+      setCurrentQuestionIndex((prev) => prev + 1)
       setSelectedAnswer(null)
       setTimeLeft(30)
+      setIsTimerActive(true)
     } else {
       handleQuizComplete()
     }
-  }, [currentQuestionIndex, handleQuizComplete, questions.length])
+  }, [
+    currentQuestionIndex,
+    questions.length,
+    setIsTimerActive,
+    handleQuizComplete,
+  ])
 
   const generateQuestions = (countries: Country[]) => {
     const questionTypes = [
@@ -95,15 +110,16 @@ const Quiz = ({ handleQuizComplete, setScore }: QuizProps) => {
   }, [data])
 
   useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setInterval(() => {
+    let timer: NodeJS.Timeout
+    if (timeLeft > 0 && isTimerActive) {
+      timer = setInterval(() => {
         setTimeLeft((prev) => prev - 1)
       }, 1000)
       return () => clearInterval(timer)
     } else if (timeLeft === 0) {
       handleNextQuestion()
     }
-  }, [handleNextQuestion, setTimeLeft, timeLeft])
+  }, [timeLeft, isTimerActive, handleNextQuestion])
 
   if (loading) {
     return (

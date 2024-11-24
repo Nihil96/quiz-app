@@ -17,7 +17,6 @@ const Leaderboard = ({ setLeaderboard, leaderboard }: LeaderboardProps) => {
 
   useEffect(() => {
     const savedLeaderboard = localStorage.getItem("quizLeaderboard")
-    console.log(savedLeaderboard)
     if (savedLeaderboard) {
       setLeaderboard(JSON.parse(savedLeaderboard))
     }
