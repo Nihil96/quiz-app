@@ -6,6 +6,7 @@ import Quiz from "./pages/quiz"
 import Leaderboard from "./pages/leaderboard"
 import { AnsweredQuestions, PlayerScoreEntry } from "./types"
 import Results from "./pages/results"
+import PageNotFound from "./pages/pageNotFound"
 
 function App() {
   const [username, setUsername] = useState("")
@@ -49,46 +50,49 @@ function App() {
   }
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <Welcome
-            username={username}
-            handleUsernameChange={handleUsernameChange}
-            handleStartQuiz={handleStartQuiz}
-          />
-        }
-      />
-      <Route
-        path="/quiz"
-        element={
-          <Quiz
-            setScore={setScore}
-            handleQuizComplete={handleQuizComplete}
-            isTimerActive={isTimerActive}
-            setIsTimerActive={setIsTimerActive}
-            answeredQuestions={answeredQuestions}
-            setAnsweredQuestions={setAnsweredQuestions}
-          />
-        }
-      />
-      <Route
-        path="/leaderboard"
-        element={
-          <Leaderboard
-            username={username}
-            score={score}
-            leaderboard={leaderboard}
-            setLeaderboard={setLeaderboard}
-          />
-        }
-      />
-      <Route
-        path="/results"
-        element={<Results score={score} totalQuestions={10} />}
-      />
-    </Routes>
+    <div className="min-h-full w-full p-6">
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Welcome
+              username={username}
+              handleUsernameChange={handleUsernameChange}
+              handleStartQuiz={handleStartQuiz}
+            />
+          }
+        />
+        <Route
+          path="/quiz"
+          element={
+            <Quiz
+              setScore={setScore}
+              handleQuizComplete={handleQuizComplete}
+              isTimerActive={isTimerActive}
+              setIsTimerActive={setIsTimerActive}
+              answeredQuestions={answeredQuestions}
+              setAnsweredQuestions={setAnsweredQuestions}
+            />
+          }
+        />
+        <Route
+          path="/leaderboard"
+          element={
+            <Leaderboard
+              username={username}
+              score={score}
+              leaderboard={leaderboard}
+              setLeaderboard={setLeaderboard}
+            />
+          }
+        />
+        <Route
+          path="/results"
+          element={<Results score={score} totalQuestions={10} />}
+        />
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </div>
   )
 }
 
