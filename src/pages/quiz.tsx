@@ -180,7 +180,9 @@ const Quiz = ({
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             <Timer className="mr-2" />
-            <span>{timeLeft}s</span>
+            <span className={timeLeft <= 5 ? "text-red-500" : ""}>
+              {timeLeft}s
+            </span>
           </div>
           <div>
             Question {currentQuestionIndex + 1}/{questions.length}

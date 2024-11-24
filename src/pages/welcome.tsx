@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
+import { useEffect, useRef } from "react"
 
 interface WelcomeProps {
   username: string
@@ -14,9 +15,14 @@ const Welcome = ({
   handleStartQuiz,
 }: WelcomeProps) => {
   const navigate = useNavigate()
+  const usernameInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    usernameInputRef.current?.focus()
+  }, [])
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto shadow-lg shadow-gray-400/50">
       <CardHeader>
         <CardTitle className="text-3xl text-center mb-4">
           World Geography Quiz
@@ -28,6 +34,7 @@ const Welcome = ({
         </div>
         <div className="flex flex-col items-center space-y-4">
           <input
+            ref={usernameInputRef}
             type="text"
             placeholder="Enter your username"
             value={username}
