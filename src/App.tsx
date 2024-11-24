@@ -50,7 +50,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-full w-full p-6">
+    <div className="min-h-full w-full px-2">
       <Routes>
         <Route
           path="/"
