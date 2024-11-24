@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { Home, Smile, Trophy, Medal, Award } from "lucide-react"
 import { useEffect } from "react"
 import { PlayerScoreEntry } from "@/types"
+import { ROUTES } from "@/constants/routes"
 
 interface LeaderboardProps {
   username: string
@@ -44,7 +45,7 @@ const Leaderboard = ({ setLeaderboard, leaderboard }: LeaderboardProps) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center from-background to-muted">
+    <div className="min-h-screen flex items-center justify-center from-background to-muted mt-6">
       <Card className="w-full max-w-2xl mx-auto shadow-lg opacity-0 animate-fade-in">
         <CardHeader>
           <CardTitle className="text-3xl text-center mb-4 opacity-0 animate-slide-down">
@@ -98,7 +99,7 @@ const Leaderboard = ({ setLeaderboard, leaderboard }: LeaderboardProps) => {
             </div>
           )}
           <Button
-            onClick={() => navigate("/")}
+            onClick={() => navigate(ROUTES.WELCOME)}
             className="mt-8 w-full opacity-0 animate-slide-up-1000 hover:scale-105 transition-transform"
             variant="outline"
           >

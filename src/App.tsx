@@ -7,6 +7,7 @@ import Leaderboard from "./pages/leaderboard"
 import { AnsweredQuestions, PlayerScoreEntry } from "./types"
 import Results from "./pages/results"
 import PageNotFound from "./pages/pageNotFound"
+import { ROUTES } from "./constants/routes"
 
 function App() {
   const [username, setUsername] = useState("")
@@ -30,7 +31,7 @@ function App() {
     setScore(0)
     setAnsweredQuestions({})
     setIsTimerActive(true)
-    navigate("/quiz")
+    navigate(ROUTES.QUIZ)
   }
 
   const handleQuizComplete = () => {
@@ -49,11 +50,30 @@ function App() {
     navigate("results")
   }
 
+  const handleIncrementScore = (value: number = 1) => {
+    setScore((prev) => prev + value)
+  }
+
+  const handleToggleTimer = (state: boolean) => {
+    setIsTimerActive(state)
+  }
+
+  const handleUpdateAnsweredQuestions = (
+    questionIndex: number,
+    answer: string,
+    isCorrect: boolean
+  ) => {
+    setAnsweredQuestions((prev) => ({
+      ...prev,
+      [questionIndex]: { answer, isCorrect },
+    }))
+  }
+
   return (
     <div className="min-h-full w-full px-2">
       <Routes>
         <Route
-          path="/"
+          path={ROUTES.WELCOME}
           element={
             <Welcome
               username={username}
@@ -63,20 +83,20 @@ function App() {
           }
         />
         <Route
-          path="/quiz"
+          path={ROUTES.QUIZ}
           element={
             <Quiz
-              setScore={setScore}
               handleQuizComplete={handleQuizComplete}
               isTimerActive={isTimerActive}
-              setIsTimerActive={setIsTimerActive}
+              handleToggleTimer={handleToggleTimer}
               answeredQuestions={answeredQuestions}
-              setAnsweredQuestions={setAnsweredQuestions}
+              handleUpdateAnsweredQuestions={handleUpdateAnsweredQuestions}
+              handleIncrementScore={handleIncrementScore}
             />
           }
         />
         <Route
-          path="/leaderboard"
+          path={ROUTES.LEADERBOARD}
           element={
             <Leaderboard
               username={username}
@@ -87,10 +107,10 @@ function App() {
           }
         />
         <Route
-          path="/results"
+          path={ROUTES.RESULT}
           element={<Results score={score} totalQuestions={10} />}
         />
-        <Route path="*" element={<PageNotFound />} />
+        <Route path={ROUTES.PAGE_NOT_FOUND} element={<PageNotFound />} />
       </Routes>
     </div>
   )

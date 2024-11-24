@@ -1,9 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Trophy, Home, BadgeCheck, Star } from "lucide-react"
+import { Trophy, Home } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import { getFeedback } from "@/utils"
+import { ROUTES } from "@/constants/routes"
 
 interface ResultsProps {
   score: number
@@ -14,21 +16,7 @@ const Results = ({ score, totalQuestions }: ResultsProps) => {
   const navigate = useNavigate()
   const percentage = (score / totalQuestions) * 100
 
-  const getFeedback = () => {
-    if (percentage === 100)
-      return { message: "Perfect Score!", icon: Star, color: "text-yellow-500" }
-    if (percentage >= 80)
-      return {
-        message: "Excellent Work!",
-        icon: BadgeCheck,
-        color: "text-green-500",
-      }
-    if (percentage >= 60)
-      return { message: "Good Job!", icon: Trophy, color: "text-blue-500" }
-    return { message: "Keep Practicing!", icon: Star, color: "text-purple-500" }
-  }
-
-  const feedback = getFeedback()
+  const feedback = getFeedback(percentage)
   const FeedbackIcon = feedback.icon
 
   return (
@@ -57,7 +45,7 @@ const Results = ({ score, totalQuestions }: ResultsProps) => {
           </div>
           <div className="flex flex-col sm:flex-row justify-center gap-4 opacity-0 animate-slide-up-800">
             <Button
-              onClick={() => navigate("/")}
+              onClick={() => navigate(ROUTES.WELCOME)}
               variant="outline"
               className="group hover:scale-105 transition-transform"
             >
@@ -65,7 +53,7 @@ const Results = ({ score, totalQuestions }: ResultsProps) => {
               Try Again
             </Button>
             <Button
-              onClick={() => navigate("/leaderboard")}
+              onClick={() => navigate(ROUTES.LEADERBOARD)}
               className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 group hover:scale-105 transition-transform"
             >
               <Trophy className="mr-2 group-hover:animate-bounce" />

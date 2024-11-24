@@ -1,41 +1,39 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import {
-  Timer,
-  ChevronRight,
-  ChevronLeft,
-  Target,
-  Map,
-  Award,
-} from "lucide-react"
+import { Timer, ChevronRight, ChevronLeft } from "lucide-react"
 import { AnsweredQuestions, Country, Question } from "@/types"
 import { useCallback, useEffect, useState } from "react"
 import { getRandomCapitals, getRandomContinents, shuffleArray } from "@/helpers"
 import { useQuery } from "@apollo/client"
 import { GET_COUNTRIES } from "@/graphql/queries/countriesQueries"
+import { getQuestionIcon } from "@/utils"
 
 interface QuizProps {
-  setScore: React.Dispatch<React.SetStateAction<number>>
+  handleIncrementScore: (value?: number) => void
   handleQuizComplete: () => void
-  setIsTimerActive: React.Dispatch<React.SetStateAction<boolean>>
+  handleToggleTimer: (state: boolean) => void
   isTimerActive: boolean
-  setAnsweredQuestions: React.Dispatch<React.SetStateAction<AnsweredQuestions>>
+  handleUpdateAnsweredQuestions: (
+    questionIndex: number,
+    answer: string,
+    isCorrect: boolean
+  ) => void
   answeredQuestions: AnsweredQuestions
 }
 
 const Quiz = ({
   handleQuizComplete,
-  setScore,
-  setIsTimerActive,
+  handleIncrementScore,
+  handleToggleTimer,
   isTimerActive,
-  setAnsweredQuestions,
+  handleUpdateAnsweredQuestions,
   answeredQuestions,
 }: QuizProps) => {
   const [questions, setQuestions] = useState<Question[]>([])
   const [timeLeft, setTimeLeft] = useState(30)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>()
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
   const { data, loading, error } = useQuery(GET_COUNTRIES)
 
   const handleAnswerSelect = (answer: string) => {
@@ -44,21 +42,15 @@ const Quiz = ({
       return
     }
 
-    setIsTimerActive(false)
+    handleToggleTimer(false)
     setSelectedAnswer(answer)
     const isCorrect = answer === questions[currentQuestionIndex].correctAnswer
 
     // Store the answer and whether it was correct
-    setAnsweredQuestions((prev) => ({
-      ...prev,
-      [currentQuestionIndex]: {
-        answer,
-        isCorrect,
-      },
-    }))
+    handleUpdateAnsweredQuestions(currentQuestionIndex, answer, isCorrect)
 
     if (isCorrect) {
-      setScore((prev) => prev + 1)
+      handleIncrementScore()
     }
   }
 
@@ -68,7 +60,7 @@ const Quiz = ({
       const prevAnswer = answeredQuestions[currentQuestionIndex - 1]
       setSelectedAnswer(prevAnswer ? prevAnswer.answer : null)
       setTimeLeft(30)
-      setIsTimerActive(false)
+      handleToggleTimer(false)
     }
   }
 
@@ -78,7 +70,7 @@ const Quiz = ({
       const nextAnswer = answeredQuestions[currentQuestionIndex + 1]
       setSelectedAnswer(nextAnswer ? nextAnswer.answer : null)
       setTimeLeft(30)
-      setIsTimerActive(true)
+      handleToggleTimer(true)
     } else {
       handleQuizComplete()
     }
@@ -86,7 +78,7 @@ const Quiz = ({
     currentQuestionIndex,
     questions.length,
     answeredQuestions,
-    setIsTimerActive,
+    handleToggleTimer,
     handleQuizComplete,
   ])
 
@@ -94,7 +86,7 @@ const Quiz = ({
     const questionTypes = [
       // Capital city questions
       (country: Country) => ({
-        type: "capital",
+        type: "capital" as const,
         question: `What is the capital of ${country.name}?`,
         correctAnswer: country.capital,
         options: shuffleArray([
@@ -104,7 +96,7 @@ const Quiz = ({
       }),
       // Continent questions
       (country: Country) => ({
-        type: "continent",
+        type: "continent" as const,
         question: `Which continent is ${country.name} located in?`,
         correctAnswer: country.continent.name,
         options: shuffleArray([
@@ -114,7 +106,7 @@ const Quiz = ({
       }),
     ]
 
-    const generatedQuestions = []
+    const generatedQuestions: Question[] = []
     const usedCountries = new Set()
 
     while (
@@ -129,8 +121,20 @@ const Quiz = ({
         generatedQuestions.push(questionType(country))
       }
     }
-    // TODO: fix types
     setQuestions(shuffleArray(generatedQuestions))
+  }
+
+  const getAnswerHighlightClass = (
+    option: string,
+    currentAnswer: string | null,
+    correctAnswer: string
+  ) => {
+    if (currentAnswer && option === correctAnswer) {
+      return "bg-green-500 hover:bg-green-600"
+    } else if (currentAnswer === option && option !== correctAnswer) {
+      return "bg-red-500 hover:bg-red-600"
+    }
+    return ""
   }
 
   useEffect(() => {
@@ -181,17 +185,6 @@ const Quiz = ({
     ? answeredQuestion.answer
     : selectedAnswer
 
-  const getQuestionIcon = () => {
-    switch (currentQuestion.type) {
-      case "capital":
-        return <Target className="w-6 h-6 text-purple-500 animate-pulse" />
-      case "continent":
-        return <Map className="w-6 h-6 text-blue-500 animate-pulse" />
-      default:
-        return <Award className="w-6 h-6 text-amber-500 animate-pulse" />
-    }
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center from-background to-muted">
       <Card className="w-full max-w-2xl mx-auto bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 shadow-lg animate-slide-down">
@@ -224,7 +217,7 @@ const Quiz = ({
             className="h-4 animate-slide-up-400"
           />
           <div className="flex items-center gap-3 mb-4 animate-slide-up-600">
-            {getQuestionIcon()}
+            {getQuestionIcon(currentQuestion)}
             <CardTitle className="text-xl">
               {currentQuestion.question}
             </CardTitle>
@@ -238,14 +231,11 @@ const Quiz = ({
                   key={index}
                   onClick={() => handleAnswerSelect(option)}
                   variant={currentAnswer === option ? "default" : "outline"}
-                  className={`w-full justify-start ${
-                    currentAnswer && option === currentQuestion.correctAnswer
-                      ? "bg-green-500 hover:bg-green-600"
-                      : currentAnswer === option &&
-                        option !== currentQuestion.correctAnswer
-                      ? "bg-red-500 hover:bg-red-600"
-                      : ""
-                  }`}
+                  className={`w-full justify-start ${getAnswerHighlightClass(
+                    option,
+                    currentAnswer ?? null,
+                    currentQuestion.correctAnswer
+                  )}`}
                 >
                   {option}
                 </Button>

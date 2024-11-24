@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useRef } from "react"
+import { ROUTES } from "@/constants/routes"
 
 interface WelcomeProps {
   username: string
@@ -49,7 +50,7 @@ const Welcome = ({
               Start Quiz
             </Button>
             <Button
-              onClick={() => navigate("/leaderboard")}
+              onClick={() => navigate(ROUTES.LEADERBOARD)}
               variant="outline"
               className="w-64 transform transition-all duration-300 hover:scale-105 hover:shadow-lg opacity-0 animate-slide-up-1000"
             >
