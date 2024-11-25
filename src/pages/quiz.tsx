@@ -214,9 +214,9 @@ const Quiz = ({
           </div>
           <Progress
             value={((currentQuestionIndex + 1) / questions.length) * 100}
-            className="h-4 animate-slide-up-400"
+            className="h-4 opacity-0 animate-slide-up-400"
           />
-          <div className="flex items-center gap-3 mb-4 animate-slide-up-600">
+          <div className="flex items-center gap-3 mb-4 opacity-0 animate-slide-up-800">
             {getQuestionIcon(currentQuestion)}
             <CardTitle className="text-xl">
               {currentQuestion.question}
