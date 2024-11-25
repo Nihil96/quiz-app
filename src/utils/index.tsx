@@ -1,5 +1,13 @@
 import { Question } from "@/types"
-import { BadgeCheck, Star, Trophy, Target, Map, Award } from "lucide-react"
+import {
+  BadgeCheck,
+  Star,
+  Trophy,
+  Target,
+  Map,
+  Award,
+  Medal,
+} from "lucide-react"
 
 export const getFeedback = (percentage: number) => {
   if (percentage === 100)
@@ -23,5 +31,26 @@ export const getQuestionIcon = (currentQuestion: Question) => {
       return <Map className="w-6 h-6 text-blue-500 animate-pulse" />
     default:
       return <Award className="w-6 h-6 text-amber-500 animate-pulse" />
+  }
+}
+
+export const getRankIcon = (index: number) => {
+  switch (index) {
+    case 0:
+      return <Trophy className="w-6 h-6 text-yellow-500" />
+    case 1:
+      return <Medal className="w-6 h-6 text-gray-400" />
+    case 2:
+      return <Award className="w-6 h-6 text-amber-700" />
+    default:
+      return null
+  }
+}
+
+export const getAnimationDelay = (index: number) => {
+  return {
+    animationDelay: `${(index + 1) * 150}ms`,
+    opacity: 0,
+    animation: "slide-up 0.7s ease-out forwards",
   }
 }
