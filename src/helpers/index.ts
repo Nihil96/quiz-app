@@ -1,4 +1,4 @@
-import { Country } from "@/types"
+import { Country, PlayerScoreEntry } from "@/types"
 
 export const shuffleArray = <T>(array: T[]): T[] => {
   const newArray = [...array]
@@ -37,4 +37,9 @@ export const getRandomContinents = (
     ),
   ]
   return shuffleArray<string>(continents).slice(0, count)
+}
+
+export const getInitialLeaderboard = (): PlayerScoreEntry[] => {
+  const savedLeaderboard = localStorage.getItem("quizLeaderboard")
+  return savedLeaderboard ? JSON.parse(savedLeaderboard) : []
 }

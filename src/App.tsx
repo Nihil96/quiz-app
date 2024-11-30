@@ -8,11 +8,14 @@ import { AnsweredQuestions, PlayerScoreEntry } from "./types"
 import Results from "./pages/results"
 import PageNotFound from "./pages/pageNotFound"
 import { ROUTES } from "./constants/routes"
+import { getInitialLeaderboard } from "./helpers"
 
 function App() {
   const [username, setUsername] = useState("")
   const [score, setScore] = useState(0)
-  const [leaderboard, setLeaderboard] = useState<PlayerScoreEntry[]>([])
+  const [leaderboard, setLeaderboard] = useState<PlayerScoreEntry[]>(
+    getInitialLeaderboard
+  )
   const [isTimerActive, setIsTimerActive] = useState(true)
   const [answeredQuestions, setAnsweredQuestions] = useState<AnsweredQuestions>(
     {}
@@ -102,7 +105,6 @@ function App() {
               username={username}
               score={score}
               leaderboard={leaderboard}
-              setLeaderboard={setLeaderboard}
             />
           }
         />

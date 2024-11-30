@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { Home, Smile } from "lucide-react"
-import { useEffect } from "react"
 import { PlayerScoreEntry } from "@/types"
 import { ROUTES } from "@/constants/routes"
 import { getAnimationDelay, getRankIcon } from "@/utils"
@@ -11,18 +10,10 @@ interface LeaderboardProps {
   username: string
   score: number
   leaderboard: PlayerScoreEntry[]
-  setLeaderboard: React.Dispatch<React.SetStateAction<PlayerScoreEntry[]>>
 }
 
-const Leaderboard = ({ setLeaderboard, leaderboard }: LeaderboardProps) => {
+const Leaderboard = ({ leaderboard }: LeaderboardProps) => {
   const navigate = useNavigate()
-
-  useEffect(() => {
-    const savedLeaderboard = localStorage.getItem("quizLeaderboard")
-    if (savedLeaderboard) {
-      setLeaderboard(JSON.parse(savedLeaderboard))
-    }
-  }, [setLeaderboard])
 
   return (
     <div className="min-h-screen flex items-center justify-center from-background to-muted mt-6">
