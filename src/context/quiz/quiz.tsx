@@ -6,7 +6,7 @@ import {
   shuffleArray,
 } from "@/helpers"
 import { AnsweredQuestions, Country, PlayerScoreEntry, Question } from "@/types"
-import { createContext, useCallback, useState } from "react"
+import { createContext, useCallback, useState, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 
 interface QuizContextType {
@@ -29,8 +29,7 @@ interface QuizContextType {
   generateQuestions: (countries: Country[]) => void
   handleUsernameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   decrementTimeLeft: () => void
-  setQuestions: React.Dispatch<React.SetStateAction<Question[]>>
-  setScore: React.Dispatch<React.SetStateAction<number>>
+  resetQuizState: () => void
 }
 
 const QuizContext = createContext<QuizContextType | undefined>(undefined)
@@ -51,15 +50,11 @@ const QuizProvider: React.FC<{ children: React.ReactNode }> = ({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
   const [leaderboard, setLeaderboard] = useState<PlayerScoreEntry[]>(
-    getInitialLeaderboard
+    getInitialLeaderboard()
   )
+  const isTimerExpired = useRef(false)
 
-  const handleStartQuiz = () => {
-    if (!username.trim()) {
-      alert("Please enter a valid username")
-      return
-    }
-
+  const resetQuizState = useCallback(() => {
     setScore(0)
     setAnsweredQuestions({})
     setIsTimerActive(true)
@@ -67,8 +62,8 @@ const QuizProvider: React.FC<{ children: React.ReactNode }> = ({
     setSelectedAnswer(null)
     setQuestions([])
     setTimeLeft(30)
-    navigate(ROUTES.QUIZ)
-  }
+    isTimerExpired.current = false
+  }, [])
 
   const handleQuizComplete = useCallback(() => {
     const newLeaderboardEntry = {
@@ -86,48 +81,70 @@ const QuizProvider: React.FC<{ children: React.ReactNode }> = ({
     navigate(ROUTES.RESULT)
   }, [username, score, leaderboard, navigate])
 
-  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value)
-  }
+  const handleUsernameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setUsername(e.target.value)
+    },
+    []
+  )
 
-  const handleIncrementScore = (value: number = 1) => {
+  const handleStartQuiz = useCallback(() => {
+    if (!username.trim()) {
+      alert("Please enter a valid username")
+      return
+    }
+
+    resetQuizState()
+    navigate(ROUTES.QUIZ)
+  }, [username, resetQuizState, navigate])
+
+  const handleIncrementScore = useCallback((value = 1) => {
     setScore((prev) => prev + value)
-  }
+  }, [])
 
   const handleToggleTimer = useCallback((state: boolean) => {
     setIsTimerActive(state)
   }, [])
 
-  const handleUpdateAnsweredQuestions = (
-    questionIndex: number,
-    answer: string,
-    isCorrect: boolean
-  ) => {
-    setAnsweredQuestions((prev) => ({
-      ...prev,
-      [questionIndex]: { answer, isCorrect },
-    }))
-  }
+  const handleUpdateAnsweredQuestions = useCallback(
+    (questionIndex: number, answer: string, isCorrect: boolean) => {
+      setAnsweredQuestions((prev) => ({
+        ...prev,
+        [questionIndex]: { answer, isCorrect },
+      }))
+    },
+    []
+  )
 
-  const handleAnswerSelect = (answer: string) => {
-    // Check if question has already been answered
-    if (answeredQuestions[currentQuestionIndex] !== undefined) {
-      return
-    }
+  const handleAnswerSelect = useCallback(
+    (answer: string) => {
+      // Check if question has already been answered
+      if (answeredQuestions[currentQuestionIndex] !== undefined) {
+        return
+      }
 
-    handleToggleTimer(false)
-    setSelectedAnswer(answer)
-    const isCorrect = answer === questions[currentQuestionIndex].correctAnswer
+      handleToggleTimer(false)
+      setSelectedAnswer(answer)
+      const isCorrect = answer === questions[currentQuestionIndex].correctAnswer
 
-    // Store the answer and whether it was correct
-    handleUpdateAnsweredQuestions(currentQuestionIndex, answer, isCorrect)
+      // Store the answer and whether it was correct
+      handleUpdateAnsweredQuestions(currentQuestionIndex, answer, isCorrect)
 
-    if (isCorrect) {
-      handleIncrementScore()
-    }
-  }
+      if (isCorrect) {
+        handleIncrementScore()
+      }
+    },
+    [
+      answeredQuestions,
+      currentQuestionIndex,
+      questions,
+      handleToggleTimer,
+      handleUpdateAnsweredQuestions,
+      handleIncrementScore,
+    ]
+  )
 
-  const handlePreviousQuestion = () => {
+  const handlePreviousQuestion = useCallback(() => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1)
       const prevAnswer = answeredQuestions[currentQuestionIndex - 1]
@@ -135,7 +152,7 @@ const QuizProvider: React.FC<{ children: React.ReactNode }> = ({
       setTimeLeft(30)
       handleToggleTimer(false)
     }
-  }
+  }, [currentQuestionIndex, answeredQuestions, handleToggleTimer])
 
   const handleNextQuestion = useCallback(() => {
     if (currentQuestionIndex < questions.length - 1) {
@@ -205,41 +222,60 @@ const QuizProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const decrementTimeLeft = useCallback(() => {
     setTimeLeft((prevTime) => {
-      // If time is already 0, return 0 to prevent negative values
-      if (prevTime <= 0) {
-        return 0
+      const newTime = Math.max(0, prevTime - 1)
+
+      if (newTime === 0 && !isTimerExpired.current) {
+        isTimerExpired.current = true
+        handleNextQuestion()
       }
 
-      // Decrement time by 1
-      return prevTime - 1
+      return newTime
     })
-  }, [])
+  }, [handleNextQuestion])
 
-  const contextValue: QuizContextType = {
-    // State
-    username,
-    score,
-    isTimerActive,
-    answeredQuestions,
-    questions,
-    timeLeft,
-    currentQuestionIndex,
-    selectedAnswer,
-    leaderboard,
+  const contextValue = useMemo(
+    (): QuizContextType => ({
+      // State
+      username,
+      score,
+      isTimerActive,
+      answeredQuestions,
+      questions,
+      timeLeft,
+      currentQuestionIndex,
+      selectedAnswer,
+      leaderboard,
 
-    // Methods
-    handleStartQuiz,
-    handleAnswerSelect,
-    handlePreviousQuestion,
-    handleNextQuestion,
-    generateQuestions,
-    handleUsernameChange,
-    decrementTimeLeft,
-
-    // Additional utilities
-    setQuestions,
-    setScore,
-  }
+      // Methods
+      handleStartQuiz,
+      handleAnswerSelect,
+      handlePreviousQuestion,
+      handleNextQuestion,
+      generateQuestions,
+      handleUsernameChange,
+      decrementTimeLeft,
+      resetQuizState,
+    }),
+    [
+      username,
+      score,
+      isTimerActive,
+      answeredQuestions,
+      questions,
+      timeLeft,
+      currentQuestionIndex,
+      selectedAnswer,
+      leaderboard,
+      handleStartQuiz,
+      handleAnswerSelect,
+      handlePreviousQuestion,
+      handleNextQuestion,
+      generateQuestions,
+      handleUsernameChange,
+      decrementTimeLeft,
+      resetQuizState,
+    ]
+  )
 
   return (
     <QuizContext.Provider value={contextValue}>{children}</QuizContext.Provider>
