@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { ROUTES } from "@/constants/routes"
 import { useNavigate } from "react-router-dom"
 
 const PageNotFound = () => {
@@ -14,7 +15,7 @@ const PageNotFound = () => {
         <p className="text-gray-600 mb-6">
           Sorry, the page you're looking for doesn't exist or has been moved.
         </p>
-        <Button className="w-full" onClick={() => navigate("/")}>
+        <Button className="w-full" onClick={() => navigate(ROUTES.WELCOME)}>
           Go Back Home
         </Button>
       </div>

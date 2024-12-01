@@ -1,26 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
-import { useEffect, useRef } from "react"
 import { ROUTES } from "@/constants/routes"
+import { useQuizContext } from "@/context/quiz/quiz.hook"
 
-interface WelcomeProps {
-  username: string
-  handleUsernameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  handleStartQuiz: () => void
-}
-
-const Welcome = ({
-  username,
-  handleUsernameChange,
-  handleStartQuiz,
-}: WelcomeProps) => {
+const Welcome = () => {
   const navigate = useNavigate()
-  const usernameInputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    usernameInputRef.current?.focus()
-  }, [])
+  const { username, handleUsernameChange, handleStartQuiz } = useQuizContext()
 
   return (
     <div className="min-h-screen flex items-center justify-center from-background to-muted animate-fade-in">
@@ -36,7 +22,7 @@ const Welcome = ({
           </div>
           <div className="flex flex-col items-center space-y-4">
             <input
-              ref={usernameInputRef}
+              autoFocus
               type="text"
               placeholder="Enter your username"
               value={username}

@@ -2,179 +2,54 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Timer, ChevronRight, ChevronLeft } from "lucide-react"
-import { AnsweredQuestions, Country, Question } from "@/types"
-import { useCallback, useEffect, useState } from "react"
-import { getRandomCapitals, getRandomContinents, shuffleArray } from "@/helpers"
+import { useEffect } from "react"
+import { getAnswerHighlightClass, getQuestionIcon } from "@/utils"
 import { useQuery } from "@apollo/client"
 import { GET_COUNTRIES } from "@/graphql/queries/countriesQueries"
-import { getQuestionIcon } from "@/utils"
+import { useQuizContext } from "@/context/quiz/quiz.hook"
+import QuizError from "@/components/quizError"
+import Spinner from "@/components/spinner"
 
-interface QuizProps {
-  handleIncrementScore: (value?: number) => void
-  handleQuizComplete: () => void
-  handleToggleTimer: (state: boolean) => void
-  isTimerActive: boolean
-  handleUpdateAnsweredQuestions: (
-    questionIndex: number,
-    answer: string,
-    isCorrect: boolean
-  ) => void
-  answeredQuestions: AnsweredQuestions
-}
-
-const Quiz = ({
-  handleQuizComplete,
-  handleIncrementScore,
-  handleToggleTimer,
-  isTimerActive,
-  handleUpdateAnsweredQuestions,
-  answeredQuestions,
-}: QuizProps) => {
-  const [questions, setQuestions] = useState<Question[]>([])
-  const [timeLeft, setTimeLeft] = useState(30)
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
-  const { data, loading, error } = useQuery(GET_COUNTRIES)
-
-  const handleAnswerSelect = (answer: string) => {
-    // Check if question has already been answered
-    if (answeredQuestions[currentQuestionIndex] !== undefined) {
-      return
-    }
-
-    handleToggleTimer(false)
-    setSelectedAnswer(answer)
-    const isCorrect = answer === questions[currentQuestionIndex].correctAnswer
-
-    // Store the answer and whether it was correct
-    handleUpdateAnsweredQuestions(currentQuestionIndex, answer, isCorrect)
-
-    if (isCorrect) {
-      handleIncrementScore()
-    }
-  }
-
-  const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1)
-      const prevAnswer = answeredQuestions[currentQuestionIndex - 1]
-      setSelectedAnswer(prevAnswer ? prevAnswer.answer : null)
-      setTimeLeft(30)
-      handleToggleTimer(false)
-    }
-  }
-
-  const handleNextQuestion = useCallback(() => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1)
-      const nextAnswer = answeredQuestions[currentQuestionIndex + 1]
-      setSelectedAnswer(nextAnswer ? nextAnswer.answer : null)
-      setTimeLeft(30)
-      handleToggleTimer(true)
-    } else {
-      handleQuizComplete()
-    }
-  }, [
+const Quiz = () => {
+  const {
+    generateQuestions,
+    questions,
     currentQuestionIndex,
-    questions.length,
     answeredQuestions,
-    handleToggleTimer,
-    handleQuizComplete,
-  ])
-
-  const generateQuestions = (countries: Country[]) => {
-    const questionTypes = [
-      // Capital city questions
-      (country: Country) => ({
-        type: "capital" as const,
-        question: `What is the capital of ${country.name}?`,
-        correctAnswer: country.capital,
-        options: shuffleArray([
-          country.capital,
-          ...getRandomCapitals(countries, country, 3),
-        ]),
-      }),
-      // Continent questions
-      (country: Country) => ({
-        type: "continent" as const,
-        question: `Which continent is ${country.name} located in?`,
-        correctAnswer: country.continent.name,
-        options: shuffleArray([
-          country.continent.name,
-          ...getRandomContinents(countries, country, 3),
-        ]),
-      }),
-    ]
-
-    const generatedQuestions: Question[] = []
-    const usedCountries = new Set()
-
-    while (
-      generatedQuestions.length < 10 &&
-      usedCountries.size < countries.length
-    ) {
-      const country = countries[Math.floor(Math.random() * countries.length)]
-      if (!usedCountries.has(country.name) && country.capital) {
-        usedCountries.add(country.name)
-        const questionType =
-          questionTypes[Math.floor(Math.random() * questionTypes.length)]
-        generatedQuestions.push(questionType(country))
-      }
-    }
-    setQuestions(shuffleArray(generatedQuestions))
-  }
-
-  const getAnswerHighlightClass = (
-    option: string,
-    currentAnswer: string | null,
-    correctAnswer: string
-  ) => {
-    if (currentAnswer && option === correctAnswer) {
-      return "bg-green-500 hover:bg-green-600"
-    } else if (currentAnswer === option && option !== correctAnswer) {
-      return "bg-red-500 hover:bg-red-600"
-    }
-    return ""
-  }
+    selectedAnswer,
+    timeLeft,
+    isTimerActive,
+    handleAnswerSelect,
+    handleNextQuestion,
+    handlePreviousQuestion,
+    decrementTimeLeft,
+  } = useQuizContext()
+  const { data, loading, error } = useQuery(GET_COUNTRIES)
 
   useEffect(() => {
     if (data?.countries) {
       generateQuestions(data.countries)
     }
-  }, [data])
+  }, [data, generateQuestions])
 
   useEffect(() => {
     let timer: NodeJS.Timeout
-    if (timeLeft > 0 && isTimerActive) {
+    if (!loading && !error && timeLeft > 0 && isTimerActive) {
       timer = setInterval(() => {
-        setTimeLeft((prev) => prev - 1)
+        decrementTimeLeft()
       }, 1000)
       return () => clearInterval(timer)
     } else if (timeLeft === 0) {
       handleNextQuestion()
     }
-  }, [timeLeft, isTimerActive])
+  }, [timeLeft, isTimerActive, decrementTimeLeft, loading, error])
 
   if (loading) {
-    return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardContent className="flex justify-center items-center h-48">
-          <h1>Loading...</h1>
-        </CardContent>
-      </Card>
-    )
+    return <Spinner />
   }
 
   if (error) {
-    return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardContent className="text-center">
-          <p className="text-red-500">
-            Error loading quiz data. Please try again later.
-          </p>
-        </CardContent>
-      </Card>
-    )
+    return <QuizError />
   }
 
   const currentQuestion = questions[currentQuestionIndex]
