@@ -1,18 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
-import { useEffect, useRef } from "react"
 import { ROUTES } from "@/constants/routes"
 import { useQuizContext } from "@/context/quiz/quiz.hook"
 
 const Welcome = () => {
   const navigate = useNavigate()
-  const usernameInputRef = useRef<HTMLInputElement>(null)
   const { username, handleUsernameChange, handleStartQuiz } = useQuizContext()
-
-  useEffect(() => {
-    usernameInputRef.current?.focus()
-  }, [])
 
   return (
     <div className="min-h-screen flex items-center justify-center from-background to-muted animate-fade-in">
@@ -28,7 +22,7 @@ const Welcome = () => {
           </div>
           <div className="flex flex-col items-center space-y-4">
             <input
-              ref={usernameInputRef}
+              autoFocus
               type="text"
               placeholder="Enter your username"
               value={username}
