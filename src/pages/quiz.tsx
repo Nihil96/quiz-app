@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Timer, ChevronRight, ChevronLeft } from "lucide-react"
 import { useEffect } from "react"
-import { getQuestionIcon } from "@/utils"
+import { getAnswerHighlightClass, getQuestionIcon } from "@/utils"
 import { useQuery } from "@apollo/client"
 import { GET_COUNTRIES } from "@/graphql/queries/countriesQueries"
 import { useQuizContext } from "@/context/quiz/quiz.hook"
+import QuizError from "@/components/quizError"
+import Spinner from "@/components/spinner"
 
 const Quiz = () => {
   const {
@@ -23,19 +25,6 @@ const Quiz = () => {
     decrementTimeLeft,
   } = useQuizContext()
   const { data, loading, error } = useQuery(GET_COUNTRIES)
-
-  const getAnswerHighlightClass = (
-    option: string,
-    currentAnswer: string | null,
-    correctAnswer: string
-  ) => {
-    if (currentAnswer && option === correctAnswer) {
-      return "bg-green-500 hover:bg-green-600"
-    } else if (currentAnswer === option && option !== correctAnswer) {
-      return "bg-red-500 hover:bg-red-600"
-    }
-    return ""
-  }
 
   useEffect(() => {
     if (data?.countries) {
@@ -56,25 +45,11 @@ const Quiz = () => {
   }, [timeLeft, isTimerActive, decrementTimeLeft])
 
   if (loading) {
-    return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardContent className="flex justify-center items-center h-48">
-          <h1>Loading...</h1>
-        </CardContent>
-      </Card>
-    )
+    return <Spinner />
   }
 
   if (error) {
-    return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardContent className="text-center">
-          <p className="text-red-500">
-            Error loading quiz data. Please try again later.
-          </p>
-        </CardContent>
-      </Card>
-    )
+    return <QuizError />
   }
 
   const currentQuestion = questions[currentQuestionIndex]

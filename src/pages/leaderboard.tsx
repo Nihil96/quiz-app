@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { Home, Smile } from "lucide-react"
 import { ROUTES } from "@/constants/routes"
-import { getAnimationDelay, getRankIcon } from "@/utils"
+import {
+  getAnimationDelay,
+  getLeaderboardEntryStyle,
+  getRankIcon,
+} from "@/utils"
 import { useQuizContext } from "@/context/quiz/quiz.hook"
 
 const Leaderboard = () => {
@@ -28,15 +32,7 @@ const Leaderboard = () => {
                   className={`
                     flex items-center justify-between p-4 
                     rounded-lg hover:scale-105 transition-transform
-                    ${
-                      index === 0
-                        ? "bg-yellow-50"
-                        : index === 1
-                        ? "bg-gray-50"
-                        : index === 2
-                        ? "bg-amber-50"
-                        : "bg-muted"
-                    }
+                    ${getLeaderboardEntryStyle(index)}
                   `}
                 >
                   <div className="flex items-center">

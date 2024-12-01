@@ -54,3 +54,29 @@ export const getAnimationDelay = (index: number) => {
     animation: "slide-up 0.7s ease-out forwards",
   }
 }
+
+export const getLeaderboardEntryStyle = (index: number): string => {
+  switch (index) {
+    case 0:
+      return "bg-yellow-50"
+    case 1:
+      return "bg-gray-50"
+    case 2:
+      return "bg-amber-50"
+    default:
+      return "bg-muted"
+  }
+}
+
+export const getAnswerHighlightClass = (
+  option: string,
+  currentAnswer: string | null,
+  correctAnswer: string
+) => {
+  if (currentAnswer && option === correctAnswer) {
+    return "bg-green-500 hover:bg-green-600"
+  } else if (currentAnswer === option && option !== correctAnswer) {
+    return "bg-red-500 hover:bg-red-600"
+  }
+  return ""
+}
