@@ -6,16 +6,14 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { getFeedback } from "@/utils"
 import { ROUTES } from "@/constants/routes"
+import { useQuizContext } from "@/context/quiz/quiz.hook"
 
-interface ResultsProps {
-  score: number
-  totalQuestions: number
-}
-
-const Results = ({ score, totalQuestions }: ResultsProps) => {
+const Results = () => {
   const navigate = useNavigate()
-  const percentage = (score / totalQuestions) * 100
+  const { score, questions } = useQuizContext()
 
+  const totalQuestions = questions.length
+  const percentage = (score / totalQuestions) * 100
   const feedback = getFeedback(percentage)
   const FeedbackIcon = feedback.icon
 

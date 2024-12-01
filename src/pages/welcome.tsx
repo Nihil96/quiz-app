@@ -3,20 +3,12 @@ import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useRef } from "react"
 import { ROUTES } from "@/constants/routes"
+import { useQuizContext } from "@/context/quiz/quiz.hook"
 
-interface WelcomeProps {
-  username: string
-  handleUsernameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  handleStartQuiz: () => void
-}
-
-const Welcome = ({
-  username,
-  handleUsernameChange,
-  handleStartQuiz,
-}: WelcomeProps) => {
+const Welcome = () => {
   const navigate = useNavigate()
   const usernameInputRef = useRef<HTMLInputElement>(null)
+  const { username, handleUsernameChange, handleStartQuiz } = useQuizContext()
 
   useEffect(() => {
     usernameInputRef.current?.focus()

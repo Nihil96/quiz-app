@@ -2,18 +2,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { Home, Smile } from "lucide-react"
-import { PlayerScoreEntry } from "@/types"
 import { ROUTES } from "@/constants/routes"
 import { getAnimationDelay, getRankIcon } from "@/utils"
+import { useQuizContext } from "@/context/quiz/quiz.hook"
 
-interface LeaderboardProps {
-  username: string
-  score: number
-  leaderboard: PlayerScoreEntry[]
-}
-
-const Leaderboard = ({ leaderboard }: LeaderboardProps) => {
+const Leaderboard = () => {
   const navigate = useNavigate()
+  const { leaderboard } = useQuizContext()
 
   return (
     <div className="min-h-screen flex items-center justify-center from-background to-muted mt-6">
