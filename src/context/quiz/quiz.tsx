@@ -143,7 +143,10 @@ const QuizProvider: React.FC<{ children: React.ReactNode }> = ({
       const nextAnswer = answeredQuestions[currentQuestionIndex + 1]
       setSelectedAnswer(nextAnswer ? nextAnswer.answer : null)
       setTimeLeft(30)
-      handleToggleTimer(true)
+
+      if (!nextAnswer) {
+        handleToggleTimer(true)
+      }
     } else {
       handleQuizComplete()
     }

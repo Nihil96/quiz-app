@@ -2,7 +2,7 @@ import { gql } from "@apollo/client"
 
 export const GET_COUNTRIES = gql`
   query GetCountries {
-    countris {
+    countries {
       name
       capital
       continent {

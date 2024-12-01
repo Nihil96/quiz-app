@@ -34,7 +34,7 @@ const Quiz = () => {
 
   useEffect(() => {
     let timer: NodeJS.Timeout
-    if (timeLeft > 0 && isTimerActive) {
+    if (!loading && !error && timeLeft > 0 && isTimerActive) {
       timer = setInterval(() => {
         decrementTimeLeft()
       }, 1000)
@@ -42,7 +42,7 @@ const Quiz = () => {
     } else if (timeLeft === 0) {
       handleNextQuestion()
     }
-  }, [timeLeft, isTimerActive, decrementTimeLeft])
+  }, [timeLeft, isTimerActive, decrementTimeLeft, loading, error])
 
   if (loading) {
     return <Spinner />
